@@ -1,0 +1,39 @@
+<%include partials/header %>
+<div class="container">
+	<div class="row">
+	<h1 style="text-align: center;">Edit <%=  music.musicname %></h1>
+	<div style="width: 30%; margin: 30px auto;">
+	<form class="addmusic" action="/editMusic/<%= music._id %>?_method=PUT" method="POST">
+		<div class="form-group">
+			<input class="form-control" type="text" name="music[musicname]" value="<%= music.musicname %>">
+		</div>
+		<div class="form-group">
+			<input class="form-control" type="text" name="music[price]" value="<%= music.price %>">
+		</div>
+		<div class="form-group">
+			<input class="form-control" type="text" name="music[cover]" value="<%= music.cover %>">
+		</div>
+		<div class="form-group">
+			<input class="form-control" type="text" name="music[description]" value="<%= music.description %>">
+		</div>
+		<div class="form-group">
+			<button id="addMusic" class="btn btn-lg btn-warning btn-block">Edit music</button>
+		</div>
+		
+		
+				
+			
+	</form>
+	<form class="deletemusic" action="/deleteMusic/<%= music._id %>?_method=DELETE" method="POST">
+		<div class="form-group">
+			<button id="addMusic" class="btn btn-lg btn-danger btn-block">Delete music</button>
+		</div>
+	</form>
+		<a href="/musicstore">Go back</a>
+	</div>
+	
+		
+	</div>
+	
+</div>
+<%include partials/footer%>

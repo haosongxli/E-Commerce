@@ -1,0 +1,38 @@
+<% include partials/header %>
+
+  <div class="container">
+
+  <header class="jumbotron">
+    <h1><i class="fa fa-music"></i> Mucis Store </h1>
+    <p>A good place to find the music you like</p> 
+
+  </header>
+  
+
+    <div class="row text-center" style="display: flex; flex-wrap: wrap;">
+      <%music.forEach(function(music){%>
+        <div class="col-md-3 col-sm-6">
+          <div class="thumbnail">
+            <img src="<%= music.cover%>">
+            <div class="caption">
+              <h4><%= music.musicname%></h4>
+            </div>
+            <p>
+              <a href="/music/<%= music._id %>" class="btn btn-primary">More info</a>
+              <% if(currentUser){ %>
+              <a href="/buy/<%= music._id %>" class="btn btn-primary">Buy</a>
+              <% if(currentUser.admin){ %>
+              <a href="/editMusic/<%= music._id %>" class="btn btn-warning">Edit</a>
+              <% } %>
+              <% } %>
+            </p>
+          </div>
+        </div>
+
+      <%});%>
+    </div>
+
+<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+<% include partials/footer %>
