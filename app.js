@@ -34,17 +34,32 @@ app.set("view engine", "ejs");
 app.use(express.static(__dirname));
 
 
-
-
-
 app.get("/musicstore", function(req, res){
-	Music.find({}, function(err, music){
-		if(err){
-			console.log(err);
-		}else{
-			res.render("index", {music: music});
-		}
+	res.redirect("/musicstore/1");
+})
+
+
+app.get("/musicstore/:page", function(req, res){
+	var perPage = 4;
+	var page = req.params.page || 1;
+
+	Music.find({}).skip((perPage*page)-perPage).limit(perPage).exec(function(err, music){
+		Music.count().exec(function(err, count){
+			if(err){
+				console.log(err);
+			}else{
+				res.render("index", {music: music, page: page, pageNumber: Math.ceil(count/perPage)})
+			}
+		})
 	})
+
+	// Music.find({}, function(err, music){
+	// 	if(err){
+	// 		console.log(err);
+	// 	}else{
+	// 		res.render("index", {music: music});
+	// 	}
+	// })
 
 })
 

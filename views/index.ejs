@@ -31,7 +31,36 @@
 
       <%});%>
     </div>
-
+    <div style="text-align: center;">
+    <% if (pageNumber > 0) { %>
+        <ul class="pagination text-center">
+            <% if (page == 1) { %>
+                <li class="disabled"><a>First</a></li>
+            <% } else { %>
+                <li><a href="/musicstore/1">First</a></li>
+            <% } %>
+            <% var i = (Number(page) > 5 ? Number(page) - 4 : 1) %>
+            <% if (i !== 1) { %>
+                <li class="disabled"><a>...</a></li>
+            <% } %>
+            <% for (; i <= (Number(page) + 4) && i <= pageNumber; i++) { %>
+                <% if (i == page) { %>
+                    <li class="active"><a><%= i %></a></li>
+                <% } else { %>
+                    <li><a href="/musicstore/<%= i %>"><%= i %></a></li>
+                <% } %>
+                <% if (i == Number(page) + 4 && i < pageNumber) { %>
+                    <li class="disabled"><a>...</a></li>
+                <% } %>
+            <% } %>
+            <% if (page == pageNumber) { %>
+                <li class="disabled"><a>Last</a></li>
+            <% } else { %>
+                <li><a href="/musicstore/<%= pageNumber %>">Last</a></li>
+            <% } %>
+        </ul>
+    <% } %>
+    </div>
 <script src="https://code.jquery.com/jquery-2.1.4.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
