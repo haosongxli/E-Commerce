@@ -126,7 +126,9 @@ app.post("/addMusic", function(req, res){
 		musicname: req.body.musicname,
 		price: req.body.price,
 		cover: req.body.cover,
-		description: req.body.description
+		style: req.body.style,
+		artist: req.body.artist,
+		review: req.body.review
 	});
 	music.save(function(err, music){
 		if(err)

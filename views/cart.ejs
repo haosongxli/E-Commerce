@@ -1,0 +1,33 @@
+<%include partials/header %>
+<div class="container">
+	
+	<h1>Hi, <%= user.username%></h1>
+
+
+	<div class="row text-center" style="display: flex; flex-wrap: wrap;">
+		<%var price = 0%>
+      <%user.cart.forEach(function(music){%>
+      	<% price += music.price %>
+        <div class="col-md-3 col-sm-6">
+          <div class="thumbnail">
+            <img src="<%= music.cover%>">
+            <div class="caption">
+              <h4><%= music.musicname%></h4>
+            </div>
+            <p>
+              <a href="/music/<%= music._id %>" class="btn btn-primary">More info</a>
+              <!-- <% if(currentUser){ %>
+              <a href="/buy/<%= currentUser._id %>/<%= music._id %>" class="btn btn-primary">Buy</a>
+              <% } %> -->
+            </p>
+          </div>
+        </div>
+
+      <%});%>
+    </div>
+
+	<h2>Total price is: <%= price %></h2>
+
+</div>
+
+<%include partials/footer %>
