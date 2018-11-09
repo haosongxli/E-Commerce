@@ -6,7 +6,8 @@ var musicSchema = new mongoose.Schema({
 	cover: String,
 	style: String,
 	artist: String,
-	review: String
+	review: String,
+	avaliable: Boolean
 });
 
 var Music = mongoose.model("Music", musicSchema);

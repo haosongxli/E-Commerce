@@ -5,30 +5,30 @@
   <header class="jumbotron">
     <h1><i class="fa fa-music"></i> Mucis Store </h1>
     <p>A good place to find the music you like</p> 
-
   </header>
   
 
     <div class="row text-center" style="display: flex; flex-wrap: wrap;">
       <%music.forEach(function(music){%>
-        <div class="col-md-3 col-sm-6">
-          <div class="thumbnail">
-            <img src="<%= music.cover%>">
-            <div class="caption">
-              <h4><%= music.musicname%></h4>
+        
+          <div class="col-md-3 col-sm-6">
+            <div class="thumbnail">
+              <img src="<%= music.cover%>">
+              <div class="caption">
+                <h4><%= music.musicname%></h4>
+              </div>
+              <p>
+                <a href="/music/<%= music._id %>" class="btn btn-primary">More info</a>
+                <% if(currentUser){ %>
+                <a href="/buy/<%= music._id %>" class="btn btn-primary">Buy</a>
+                <% if(currentUser.admin){ %>
+                <a href="/editMusic/<%= music._id %>" class="btn btn-warning">Edit</a>
+                <% } %>
+                <% } %>
+              </p>
             </div>
-            <p>
-              <a href="/music/<%= music._id %>" class="btn btn-primary">More info</a>
-              <% if(currentUser){ %>
-              <a href="/buy/<%= music._id %>" class="btn btn-primary">Buy</a>
-              <% if(currentUser.admin){ %>
-              <a href="/editMusic/<%= music._id %>" class="btn btn-warning">Edit</a>
-              <% } %>
-              <% } %>
-            </p>
           </div>
-        </div>
-
+        
       <%});%>
     </div>
     <div style="text-align: center;">
@@ -37,7 +37,7 @@
             <% if (page == 1) { %>
                 <li class="disabled"><a>First</a></li>
             <% } else { %>
-                <li><a href="/musicstore/1">First</a></li>
+                <li><a href="/musicstore?page=1<% if(search!=""){ %>&search=<%=search%><% } %><% if(style!=""){ %>&style=<%=style%><% } %><% if(artist!=""){ %>&artist=<%=artist%><% } %>">First</a></li>
             <% } %>
             <% var i = (Number(page) > 5 ? Number(page) - 4 : 1) %>
             <% if (i !== 1) { %>
@@ -47,7 +47,7 @@
                 <% if (i == page) { %>
                     <li class="active"><a><%= i %></a></li>
                 <% } else { %>
-                    <li><a href="/musicstore/<%= i %>"><%= i %></a></li>
+                    <li><a href="/musicstore?page=<%= i %><% if(search!=""){ %>&search=<%=search%><% } %><% if(style!=""){ %>&style=<%=style%><% } %><% if(artist!=""){ %>&artist=<%=artist%><% } %>"><%= i %></a></li>
                 <% } %>
                 <% if (i == Number(page) + 4 && i < pageNumber) { %>
                     <li class="disabled"><a>...</a></li>
@@ -56,7 +56,7 @@
             <% if (page == pageNumber) { %>
                 <li class="disabled"><a>Last</a></li>
             <% } else { %>
-                <li><a href="/musicstore/<%= pageNumber %>">Last</a></li>
+                <li><a href="/musicstore?page=<%= pageNumber %><% if(search!=""){ %>&search=<%=search%><% } %><% if(style!=""){ %>&style=<%=style%><% } %><% if(artist!=""){ %>&artist=<%=artist%><% } %>">Last</a></li>
             <% } %>
         </ul>
     <% } %>

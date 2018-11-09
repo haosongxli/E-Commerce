@@ -35,32 +35,106 @@ app.use(express.static(__dirname));
 
 
 app.get("/musicstore", function(req, res){
-	res.redirect("/musicstore/1");
-})
-
-
-app.get("/musicstore/:page", function(req, res){
 	var perPage = 4;
-	var page = req.params.page || 1;
+	var page = req.query.page || 1;
+	var style = req.query.style || "";
+	var artist = req.query.artist || "";
+	var search = req.query.search || "";
 
-	Music.find({}).skip((perPage*page)-perPage).limit(perPage).exec(function(err, music){
-		Music.count().exec(function(err, count){
-			if(err){
-				console.log(err);
-			}else{
-				res.render("index", {music: music, page: page, pageNumber: Math.ceil(count/perPage)})
-			}
-		})
-	})
+	if(style != ""){
+		if(!req.user||!req.user.admin){
+			Music.find({ avaliable: true , style: style}).skip((perPage*page)-perPage).limit(perPage).exec(function(err, music){
+				Music.find({ avaliable: true , style: style}).count().exec(function(err, count){
+					if(err){
+						console.log(err);
+					}else{
+						res.render("index", {music: music, search: search, style: style, artist: artist, page: page, pageNumber: Math.ceil(count/perPage)})
+					}
+				})
+			})
+		}else{
+			Music.find({style: style}).skip((perPage*page)-perPage).limit(perPage).exec(function(err, music){
+				Music.find({ style: style}).count().exec(function(err, count){
+					if(err){
+						console.log(err);
+					}else{
+						res.render("index", {music: music, search: search, style: style, artist: artist, page: page, pageNumber: Math.ceil(count/perPage)})
+					}
+				})
+			})		
+		}
+		return;
+	}else if(artist != ""){
+		if(!req.user||!req.user.admin){
+			Music.find({ avaliable: true , artist: artist }).skip((perPage*page)-perPage).limit(perPage).exec(function(err, music){
+				Music.find({ avaliable: true , artist: artist }).count().exec(function(err, count){
+					if(err){
+						console.log(err);
+					}else{
+						res.render("index", {music: music, search: search, style: style, artist: artist, page: page, pageNumber: Math.ceil(count/perPage)})
+					}
+				})
+			})
+		}else{
+			Music.find({ artist: artist }).skip((perPage*page)-perPage).limit(perPage).exec(function(err, music){
+				Music.find({ artist: artist }).count().exec(function(err, count){
+					if(err){
+						console.log(err);
+					}else{
+						res.render("index", {music: music, search: search, style: style, artist: artist, page: page, pageNumber: Math.ceil(count/perPage)})
+					}
+				})
+			})		
+		}
 
-	// Music.find({}, function(err, music){
-	// 	if(err){
-	// 		console.log(err);
-	// 	}else{
-	// 		res.render("index", {music: music});
-	// 	}
-	// })
+	}else if(search != ""){
+		if(!req.user||!req.user.admin){
+			Music.find({ avaliable: true , musicname: { '$regex': search, '$options': 'i' }}).skip((perPage*page)-perPage).limit(perPage).exec(function(err, music){
+				Music.find({ avaliable: true , musicname: { '$regex': search, '$options': 'i' }}).count().exec(function(err, count){
+					if(err){
+						console.log(err);
+					}else{
+						res.render("index", {music: music, search: search, style: style, artist: artist, page: page, pageNumber: Math.ceil(count/perPage)})
+					}
+				})
+			})
+		}else{
+			Music.find({ musicname: { '$regex': search, '$options': 'i' } }).skip((perPage*page)-perPage).limit(perPage).exec(function(err, music){
+				Music.find({ musicname: { '$regex': search, '$options': 'i' } }).count().exec(function(err, count){
+					if(err){
+						console.log(err);
+					}else{
+						res.render("index", {music: music, search: search, style: style, artist: artist, page: page, pageNumber: Math.ceil(count/perPage)})
+					}
+				})
+			})		
+		}
 
+	}else{
+		if(!req.user||!req.user.admin){
+			Music.find({ avaliable: true }).skip((perPage*page)-perPage).limit(perPage).exec(function(err, music){
+				Music.find({ avaliable: true }).count().exec(function(err, count){
+					if(err){
+						console.log(err);
+					}else{
+						res.render("index", {music: music, search: search, style: style, artist: artist, page: page, pageNumber: Math.ceil(count/perPage)})
+					}
+				})
+			})
+		}else{
+			Music.find({}).skip((perPage*page)-perPage).limit(perPage).exec(function(err, music){
+				Music.count().exec(function(err, count){
+					if(err){
+						console.log(err);
+					}else{
+						res.render("index", {music: music, search: search, style: style, artist: artist, page: page, pageNumber: Math.ceil(count/perPage)})
+					}
+				})
+			})		
+		}
+	}
+
+	
 })
 
 
@@ -128,7 +202,8 @@ app.post("/addMusic", function(req, res){
 		cover: req.body.cover,
 		style: req.body.style,
 		artist: req.body.artist,
-		review: req.body.review
+		review: req.body.review,
+		avaliable: true
 	});
 	music.save(function(err, music){
 		if(err)
@@ -155,7 +230,16 @@ app.get("/editMusic/:id", function(req, res){
 });
 
 app.put("/editMusic/:id", function(req, res){
-	Music.findByIdAndUpdate(req.params.id, req.body.music, function(err, updatedMusic){
+	var music = {
+		musicname: req.body.musicname,
+		price: req.body.price,
+		cover: req.body.cover,
+		style: req.body.style,
+		artist: req.body.artist,
+		review: req.body.review,
+		avaliable: true
+	};
+	Music.findByIdAndUpdate(req.params.id, music, function(err, updatedMusic){
 		if(err){
 			res.redirect("/musicstore");
 		}else{
@@ -165,11 +249,18 @@ app.put("/editMusic/:id", function(req, res){
 })
 
 app.delete("/deleteMusic/:id", function(req, res){
-	Music.findByIdAndRemove(req.params.id, function(err){
+	Music.findById(req.params.id, function(err, foundMusic){
 		if(err){
 			res.redirect("/musicstore");
 		}else{
-			res.redirect("/musicstore");
+			foundMusic.avaliable = !foundMusic.avaliable;
+			foundMusic.save(function(err, data){
+				if(err){
+					console.log(err);
+				}else{
+					res.redirect("/editMusic/" + req.params.id);
+				}
+			})
 		}
 	})
 });
