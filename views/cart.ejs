@@ -5,9 +5,10 @@
 
 
 	<div class="row text-center" style="display: flex; flex-wrap: wrap;">
-		<%var price = 0%>
+		<%var price = 0;%>
+    <%var index = 0;%>
       <%user.cart.forEach(function(music){%>
-      	<% if(music.avaliable){price += music.price} %>
+      	<% if(music.avaliable){price = Math.round((price + music.price) * 1e12) / 1e12} %>
         <div class="col-md-3 col-sm-6">
           <div class="thumbnail">
             <img src="<%= music.cover%>">
@@ -19,13 +20,11 @@
             </div>
             <p>
               <a href="/music/<%= music._id %>" class="btn btn-primary">More info</a>
-              <!-- <% if(currentUser){ %>
-              <a href="/buy/<%= currentUser._id %>/<%= music._id %>" class="btn btn-primary">Buy</a>
-              <% } %> -->
+              <a href="/drop/<%= index %>" class="btn btn-warning">Delete</a>
             </p>
           </div>
         </div>
-
+        <% index ++; %>
       <%});%>
     </div>
 

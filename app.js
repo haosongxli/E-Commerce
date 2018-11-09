@@ -296,7 +296,25 @@ app.get("/buy/:mucisId", function(req, res){
 			})
 		}
 	})
-	res.redirect("/musicstore");
+	res.redirect("/cart");
+})
+
+app.get("/drop/:index", function(req, res){
+	User.findOne({_id: req.user._id}, function(err, foundUser){
+		if(err){
+			console.log(err);
+		}else{
+			foundUser.cart.splice(req.params.index, 1);
+			foundUser.save(function(err, data){
+				if(err){
+					console.log(err);
+				}else{
+					console.log(data);
+				}
+			})
+		}
+	})
+	res.redirect("/cart");
 })
 
 
