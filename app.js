@@ -8,6 +8,7 @@ var Orders = require("./models/orders");
 var passport = require("passport");
 var LocalStrategy = require("passport-local");
 var methodOverride = require("method-override");
+var async = require("async");
 
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -204,7 +205,8 @@ app.post("/addMusic", function(req, res){
 		style: req.body.style,
 		artist: req.body.artist,
 		review: req.body.review,
-		avaliable: true
+		avaliable: true,
+		inventory: req.body.inventory
 	});
 	music.save(function(err, music){
 		if(err)
@@ -238,7 +240,8 @@ app.put("/editMusic/:id", function(req, res){
 		style: req.body.style,
 		artist: req.body.artist,
 		review: req.body.review,
-		avaliable: true
+		avaliable: true,
+		inventory: req.body.inventory
 	};
 	Music.findByIdAndUpdate(req.params.id, music, function(err, updatedMusic){
 		if(err){
@@ -320,17 +323,50 @@ app.get("/drop/:index", function(req, res){
 
 app.get("/checkout", isLoggedIn, function(req, res){
 	var orders = new Orders({
-		userId: req.user,
-		item: req.user.cart
+		userId: req.user._id
+		
 	});
-	orders.save(function(err, orders){
+	orders.save(async function(err, orders){
 		if(err){
 			console.log(err);
 		}else{
 			console.log(orders);
+
+			req.user.cart.forEach(await function(musicId){
+				Music.findById(musicId, function(err, foundMusic){	
+
+					if(err){
+						console.log(err);
+					}else{
+						if(foundMusic.avaliable){
+							orders.item.push(foundMusic);
+							orders.save(function(err, order){
+								if(err){
+									console.log(err);
+								}else{
+									console.log(orders);
+								}
+							})
+							foundMusic.inventory--;
+						}
+						
+						if(foundMusic.inventory == 0){
+							foundMusic.avaliable = false;
+						}
+						foundMusic.save(function(err, data){
+							if(err){
+								console.log(err);
+							}else{
+								console.log(data);
+							}
+						})
+					}
+				})
+			})
 		}
 	})
-	res.redirect("/cart");
+
+	res.redirect("/history");
 })
 
 app.get("/history", isLoggedIn, function(req, res){
@@ -338,6 +374,7 @@ app.get("/history", isLoggedIn, function(req, res){
 		res.render("orders", {orders: orders});
 	})
 })
+
 
 
 function isLoggedIn(req, res, next){
