@@ -1,0 +1,28 @@
+<%include partials/header %>
+<div class="container">
+
+<% inventory.forEach(function(inventory){ %>
+	<div class="row">
+		<div class="col-md-3">
+			<h2>Order</h2>
+		</div>
+		<div class="col-md-9">
+			<% inventory.item.forEach(function(music){ %>
+			<div class="col-md-4 col-sm-8">
+				<div class="thumbnail">
+					<img src="<%= music.cover %>">
+					<div class="caption">
+						<h4><%= music.musicname%></h4>
+					</div>
+				</div>	
+			</div>
+				
+			<% }); %>
+		</div>
+	</div>
+<% }); %>
+
+
+
+</div>
+<%include partials/footer %>
