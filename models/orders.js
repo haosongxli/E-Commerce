@@ -1,6 +1,6 @@
 var mongoose = require("mongoose");
 
-var inventorySchema = new mongoose.Schema({
+var ordersSchema = new mongoose.Schema({
 	userId: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "User"
@@ -13,5 +13,5 @@ var inventorySchema = new mongoose.Schema({
 	]
 });
 
-var Inventory = mongoose.model("Inventory", inventorySchema);
-module.exports = Inventory;
+var Orders = mongoose.model("Orders", ordersSchema);
+module.exports = Orders;

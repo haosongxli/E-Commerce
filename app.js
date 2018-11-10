@@ -4,7 +4,7 @@ var mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 var User = require("./models/user");
 var Music = require("./models/music");
-var Inventory = require("./models/inventory");
+var Orders = require("./models/orders");
 var passport = require("passport");
 var LocalStrategy = require("passport-local");
 var methodOverride = require("method-override");
@@ -319,23 +319,23 @@ app.get("/drop/:index", function(req, res){
 })
 
 app.get("/checkout", isLoggedIn, function(req, res){
-	var inventory = new Inventory({
+	var orders = new Orders({
 		userId: req.user,
 		item: req.user.cart
 	});
-	inventory.save(function(err, inventory){
+	orders.save(function(err, orders){
 		if(err){
 			console.log(err);
 		}else{
-			console.log(inventory);
+			console.log(orders);
 		}
 	})
 	res.redirect("/cart");
 })
 
 app.get("/history", isLoggedIn, function(req, res){
-	Inventory.find({userId: req.user._id}).populate("item").exec(function(err, inventory){
-		res.render("inventory", {inventory: inventory});
+	Orders.find({userId: req.user._id}).populate("item").exec(function(err, orders){
+		res.render("orders", {orders: orders});
 	})
 })
 
