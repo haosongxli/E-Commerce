@@ -332,7 +332,18 @@ app.get("/checkout", isLoggedIn, function(req, res){
 		}else{
 			console.log(orders);
 
-			req.user.cart.forEach(await function(musicId){
+			var x = 0;
+			var arr = req.user.cart;
+			var loopArray = function(arr){
+				oper(arr[x], function(){
+					x++;
+					if(x < arr.length){
+						loopArray(arr);
+					}
+				})
+				
+			}
+			function oper(musicId, callback){
 				Music.findById(musicId, function(err, foundMusic){	
 
 					if(err){
@@ -345,28 +356,64 @@ app.get("/checkout", isLoggedIn, function(req, res){
 									console.log(err);
 								}else{
 									console.log(orders);
+									foundMusic.inventory--;
+									if(foundMusic.inventory == 0){
+										foundMusic.avaliable = false;
+									}
+									foundMusic.save(function(err, data){
+										if(err){
+											console.log(err);
+										}else{
+											console.log(data);
+											callback();
+										}
+									})
 								}
-							})
-							foundMusic.inventory--;
-						}
-						
-						if(foundMusic.inventory == 0){
-							foundMusic.avaliable = false;
-						}
-						foundMusic.save(function(err, data){
-							if(err){
-								console.log(err);
-							}else{
-								console.log(data);
-							}
-						})
+							})				
+						}			
 					}
-				})
-			})
+				})	
+			}
+			
+			loopArray(arr);
+
+
+
+			// req.user.cart.forEach(await function(musicId){
+			// 	Music.findById(musicId, function(err, foundMusic){	
+
+			// 		if(err){
+			// 			console.log(err);
+			// 		}else{
+			// 			if(foundMusic.avaliable){
+			// 				orders.item.push(foundMusic);
+			// 				orders.save(function(err, order){
+			// 					if(err){
+			// 						console.log(err);
+			// 					}else{
+			// 						console.log(orders);
+			// 					}
+			// 				})
+			// 				foundMusic.inventory--;
+			// 			}
+						
+			// 			if(foundMusic.inventory == 0){
+			// 				foundMusic.avaliable = false;
+			// 			}
+			// 			foundMusic.save(function(err, data){
+			// 				if(err){
+			// 					console.log(err);
+			// 				}else{
+			// 					console.log(data);
+			// 				}
+			// 			})
+			// 		}
+			// 	})
+			// })
 		}
 	})
 
-	res.redirect("/history");
+	res.redirect("/cart");
 })
 
 app.get("/history", isLoggedIn, function(req, res){
