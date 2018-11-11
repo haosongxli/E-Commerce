@@ -36,6 +36,10 @@ app.set("view engine", "ejs");
 app.use(express.static(__dirname));
 
 
+app.get("/", function(req, res){
+	res.redirect("/musicstore");
+})
+
 app.get("/musicstore", function(req, res){
 	var perPage = 4;
 	var page = req.query.page || 1;
