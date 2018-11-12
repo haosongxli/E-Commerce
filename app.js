@@ -326,6 +326,22 @@ app.get("/drop/:index", function(req, res){
 })
 
 app.get("/checkout", isLoggedIn, function(req, res){
+	
+	if(req.user.cart === undefined || req.user.cart.length == 0)
+	{
+		res.redirect("/cart");
+		return;
+	}
+	var mark = true;
+	req.user.cart.forEach(function(music){
+		if(music.avaliable){
+			mark = false;
+		}
+	})
+	if(mark){
+		res.redirect("/cart");
+		return;
+	}
 	var orders = new Orders({
 		userId: req.user._id
 		
@@ -382,11 +398,20 @@ app.get("/checkout", isLoggedIn, function(req, res){
 			}
 			
 			loopArray(arr);
-
+			User.findById(req.user._id, function(err, foundUser){
+				foundUser.cart = [];
+				foundUser.save(function(err, data){
+					if(err){
+						console.log(err);
+					}else{
+						res.redirect("/cart");
+					}
+				})
+			})
 		}
 	})
 
-	res.redirect("/cart");
+	
 })
 
 app.get("/history", isLoggedIn, function(req, res){
