@@ -187,12 +187,12 @@ app.post("/login", passport.authenticate("local",
 	}), function(req, res){
 })
 
-app.get("/logout", function(req, res){
+app.get("/logout", isLoggedIn, function(req, res){
 	req.logout();
 	res.redirect("/musicstore");
 })
 
-app.get("/admin", isLoggedIn, function(req, res){
+app.get("/admin", isAdmin, function(req, res){
 	if(req.user.admin){
 		res.render("admin");
 	}else{
@@ -201,7 +201,7 @@ app.get("/admin", isLoggedIn, function(req, res){
 	
 })
 
-app.post("/addMusic", function(req, res){
+app.post("/addMusic", isAdmin, function(req, res){
 	var music = new Music({
 		musicname: req.body.musicname,
 		price: req.body.price,
@@ -225,7 +225,7 @@ app.post("/addMusic", function(req, res){
 	res.redirect("/admin");
 })
 
-app.get("/editMusic/:id", function(req, res){
+app.get("/editMusic/:id", isAdmin, function(req, res){
 	Music.findById(req.params.id, function(err, foundMusic){
 		if(err){
 			res.redirect("/musicstore");
@@ -236,7 +236,7 @@ app.get("/editMusic/:id", function(req, res){
 	
 });
 
-app.put("/editMusic/:id", function(req, res){
+app.put("/editMusic/:id", isAdmin, function(req, res){
 	var music = {
 		musicname: req.body.musicname,
 		price: req.body.price,
@@ -256,7 +256,7 @@ app.put("/editMusic/:id", function(req, res){
 	})
 })
 
-app.delete("/deleteMusic/:id", function(req, res){
+app.delete("/deleteMusic/:id", isAdmin, function(req, res){
 	Music.findById(req.params.id, function(err, foundMusic){
 		if(err){
 			res.redirect("/musicstore");
@@ -283,7 +283,7 @@ app.get("/cart", isLoggedIn, function(req, res){
 	})
 })
 
-app.get("/buy/:mucisId", function(req, res){
+app.get("/buy/:mucisId", isLoggedIn, function(req, res){
 	Music.findById(req.params.mucisId, function(err, foundMusic){
 		if(err){
 			console.log(err);
@@ -307,7 +307,7 @@ app.get("/buy/:mucisId", function(req, res){
 	res.redirect("/cart");
 })
 
-app.get("/drop/:index", function(req, res){
+app.get("/drop/:index", isLoggedIn, function(req, res){
 	User.findOne({_id: req.user._id}, function(err, foundUser){
 		if(err){
 			console.log(err);
@@ -330,18 +330,26 @@ app.get("/checkout", isLoggedIn, function(req, res){
 	if(req.user.cart === undefined || req.user.cart.length == 0)
 	{
 		res.redirect("/cart");
+		console.log("empty");
 		return;
 	}
 	var mark = true;
-	req.user.cart.forEach(function(music){
-		if(music.avaliable){
-			mark = false;
+	User.findOne({_id: req.user._id}).populate("cart").exec(function(err, user){
+		if(err){
+			console.log(err);
+		}else{
+			user.cart.forEach(function(music){
+				if(music.avaliable){
+					mark = false;
+				}
+			})
+			if(mark){
+				res.redirect("/cart");
+				return;
+			}
 		}
 	})
-	if(mark){
-		res.redirect("/cart");
-		return;
-	}
+
 	var orders = new Orders({
 		userId: req.user._id
 		
@@ -424,6 +432,13 @@ app.get("/history", isLoggedIn, function(req, res){
 
 function isLoggedIn(req, res, next){
 	if(req.isAuthenticated()){
+		return next();
+	}
+	res.redirect("/login");
+}
+
+function isAdmin(req, res, next){
+	if(req.isAuthenticated() && req.user.admin){
 		return next();
 	}
 	res.redirect("/login");
