@@ -374,6 +374,8 @@ app.get("/checkout", isLoggedIn, function(req, res){
 									})
 								}
 							})				
+						}else{
+							callback();
 						}			
 					}
 				})	
@@ -381,39 +383,6 @@ app.get("/checkout", isLoggedIn, function(req, res){
 			
 			loopArray(arr);
 
-
-
-			// req.user.cart.forEach(await function(musicId){
-			// 	Music.findById(musicId, function(err, foundMusic){	
-
-			// 		if(err){
-			// 			console.log(err);
-			// 		}else{
-			// 			if(foundMusic.avaliable){
-			// 				orders.item.push(foundMusic);
-			// 				orders.save(function(err, order){
-			// 					if(err){
-			// 						console.log(err);
-			// 					}else{
-			// 						console.log(orders);
-			// 					}
-			// 				})
-			// 				foundMusic.inventory--;
-			// 			}
-						
-			// 			if(foundMusic.inventory == 0){
-			// 				foundMusic.avaliable = false;
-			// 			}
-			// 			foundMusic.save(function(err, data){
-			// 				if(err){
-			// 					console.log(err);
-			// 				}else{
-			// 					console.log(data);
-			// 				}
-			// 			})
-			// 		}
-			// 	})
-			// })
 		}
 	})
 

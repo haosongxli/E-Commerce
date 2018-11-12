@@ -7,25 +7,30 @@
 	<div class="row text-center" style="display: flex; flex-wrap: wrap;">
 		<%var price = 0;%>
     <%var index = 0;%>
-      <%user.cart.forEach(function(music){%>
-      	<% if(music.avaliable){price = Math.round((price + music.price) * 1e12) / 1e12} %>
+    <% var musicArray = [];%>
+    <%user.cart.forEach(function(music){%>
+      <% if(!musicArray[music.musicname]){musicArray[music.musicname] = {_id: music._id, musicname:music.musicname, cover:music.cover, price: music.price ,avaliable:music.avaliable ,qt: 1}}else{musicArray[music.musicname].qt++}  %>
+    <%});%>
+      <% for(var music in musicArray){%>
+      	<% if(musicArray[music].avaliable){price = Math.round((price + musicArray[music].price) * 1e12) / 1e12} %>
         <div class="col-md-3 col-sm-6">
           <div class="thumbnail">
-            <img src="<%= music.cover%>">
+            <img src="<%= musicArray[music].cover%>">
             <div class="caption">
-              <h4><%= music.musicname%></h4>
-              <% if(!music.avaliable){ %>
-              <h4>Not Avaliable</h4>
+              <h4><%= musicArray[music].musicname%></h4>
+              <h5>Quantity: <%= musicArray[music].qt%></h5>
+              <% if(!musicArray[music].avaliable){ %>
+              <h4 style="color: red;"><i class="fa fa-exclamation" aria-hidden="true"></i> Not Avaliable</h4>
               <%}%>
             </div>
             <p>
-              <a href="/music/<%= music._id %>" class="btn btn-primary">More info</a>
+              <a href="/music/<%= musicArray[music]._id %>" class="btn btn-primary">More info</a>
               <a href="/drop/<%= index %>" class="btn btn-warning">Delete</a>
             </p>
           </div>
         </div>
         <% index ++; %>
-      <%});%>
+      <%};%>
     </div>
 
 	<h2>Total price is: <%= price %></h2>

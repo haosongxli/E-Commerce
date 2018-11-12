@@ -2,22 +2,35 @@
 <div class="container">
 
 <% orders.forEach(function(orders){ %>
+<% var musicArray = [];%>
+<% var price = 0; %>
+<% orders.item.forEach(function(music){ %>
+<% if(!musicArray[music.musicname]){musicArray[music.musicname] = {musicname:music.musicname, cover:music.cover, price: music.price ,qt: 1}}else{musicArray[music.musicname].qt++}  %>
+<% }); %>
+<% for(var music in musicArray){%>
+<% price = Math.round((price + musicArray[music].price) * 1e12) / 1e12 %>
+<% }; %>
 	<div class="row">
 		<div class="col-md-3">
 			<h2>Order</h2>
+			
 		</div>
 		<div class="col-md-9">
-			<% orders.item.forEach(function(music){ %>
+			
+			
+			<% for(var music in musicArray){%>
+			
 			<div class="col-md-4 col-sm-8">
 				<div class="thumbnail">
-					<img src="<%= music.cover %>">
+					<img src="<%= musicArray[music].cover %>">
 					<div class="caption">
-						<h4><%= music.musicname%></h4>
+						<h4><%= musicArray[music].musicname%></h4>
+						<h5>Quantity: <%= musicArray[music].qt%></h5>
 					</div>
 				</div>	
 			</div>
 				
-			<% }); %>
+			<% }; %>
 		</div>
 	</div>
 <% }); %>
