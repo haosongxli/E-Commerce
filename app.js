@@ -9,6 +9,7 @@ var passport = require("passport");
 var LocalStrategy = require("passport-local");
 var methodOverride = require("method-override");
 var async = require("async");
+var flash = require('connect-flash');
 
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -19,6 +20,7 @@ app.use(require("express-session")({
 	resave: false,
 	saveUninitialized: false
 }));
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
@@ -27,6 +29,8 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use(function(req, res, next){
 	res.locals.currentUser = req.user;
+	res.locals.error = req.flash("error");
+	res.locals.success = req.flash("success");
 	next();
 })
 
@@ -138,9 +142,7 @@ app.get("/musicstore", function(req, res){
 				})
 			})		
 		}
-	}
-
-	
+	}	
 })
 
 
@@ -167,10 +169,11 @@ app.post("/signup", function(req, res){
 	});
 	User.register(user, req.body.password, function(err, user){
 		if(err){
-			console.log(err);
-			return res.render("signup");
+			req.flash("error", err.message);
+			return res.redirect("/signup");
 		}
 		passport.authenticate("local")(req, res, function(){
+			req.flash("success", "Welcome to music store!");
 			res.redirect("/musicstore");
 		})
 	})
@@ -189,6 +192,7 @@ app.post("/login", passport.authenticate("local",
 
 app.get("/logout", isLoggedIn, function(req, res){
 	req.logout();
+	req.flash("success", "Sucessfully logged out");
 	res.redirect("/musicstore");
 })
 
@@ -215,14 +219,15 @@ app.post("/addMusic", isAdmin, function(req, res){
 	music.save(function(err, music){
 		if(err)
 		{
-			console.log("Error when adding music");
+			req.flash("error", "Error when adding music");
 		}
 		else
 		{
-			console.log("New music added");
+			req.flash("success", "New music added");			
 		}
+		res.redirect("/admin");
 	})
-	res.redirect("/admin");
+	
 })
 
 app.get("/editMusic/:id", isAdmin, function(req, res){
@@ -249,8 +254,10 @@ app.put("/editMusic/:id", isAdmin, function(req, res){
 	};
 	Music.findByIdAndUpdate(req.params.id, music, function(err, updatedMusic){
 		if(err){
+			req.flash("error", "Error when music was edited");
 			res.redirect("/musicstore");
 		}else{
+			req.flash("success", "Edit successfully saved");
 			res.redirect("/music/" + req.params.id);
 		}
 	})
@@ -259,6 +266,7 @@ app.put("/editMusic/:id", isAdmin, function(req, res){
 app.delete("/deleteMusic/:id", isAdmin, function(req, res){
 	Music.findById(req.params.id, function(err, foundMusic){
 		if(err){
+			req.flash("error", "Music not found");
 			res.redirect("/musicstore");
 		}else{
 			foundMusic.avaliable = !foundMusic.avaliable;
@@ -266,6 +274,7 @@ app.delete("/deleteMusic/:id", isAdmin, function(req, res){
 				if(err){
 					console.log(err);
 				}else{
+					req.flash("success", "Music was deleted successfully");
 					res.redirect("/editMusic/" + req.params.id);
 				}
 			})
@@ -295,16 +304,17 @@ app.get("/buy/:mucisId", isLoggedIn, function(req, res){
 					foundUser.cart.push(foundMusic);
 					foundUser.save(function(err, data){
 						if(err){
-							console.log(err);
+							req.flash("error", "Error");
 						}else{
-							console.log(data);
+							req.flash("success", "Music was added to cart");
 						}
+						res.redirect("/cart");
 					})
 				}
 			})
 		}
 	})
-	res.redirect("/cart");
+	
 })
 
 app.get("/drop/:index", isLoggedIn, function(req, res){
@@ -315,23 +325,23 @@ app.get("/drop/:index", isLoggedIn, function(req, res){
 			foundUser.cart.splice(req.params.index, 1);
 			foundUser.save(function(err, data){
 				if(err){
-					console.log(err);
+					req.flash("error", "Error");
 				}else{
-					console.log(data);
+					req.flash("success", "Music was deleted from cart");
 				}
+				res.redirect("/cart");
 			})
 		}
 	})
-	res.redirect("/cart");
+	
 })
 
 app.get("/checkout", isLoggedIn, function(req, res){
 	
 	if(req.user.cart === undefined || req.user.cart.length == 0)
 	{
-		res.redirect("/cart");
-		console.log("empty");
-		return;
+		req.flash("error", "Can not checkout with zero item");
+		return res.redirect("/cart");		
 	}
 	var mark = true;
 	User.findOne({_id: req.user._id}).populate("cart").exec(function(err, user){
@@ -344,82 +354,81 @@ app.get("/checkout", isLoggedIn, function(req, res){
 				}
 			})
 			if(mark){
-				res.redirect("/cart");
-				return;
-			}
-		}
-	})
-
-	var orders = new Orders({
-		userId: req.user._id
-		
-	});
-	orders.save(async function(err, orders){
-		if(err){
-			console.log(err);
-		}else{
-			console.log(orders);
-
-			var x = 0;
-			var arr = req.user.cart;
-			var loopArray = function(arr){
-				oper(arr[x], function(){
-					x++;
-					if(x < arr.length){
-						loopArray(arr);
-					}
-				})
+				req.flash("error", "Can not checkout with zero item");
+				return res.redirect("/cart");
 				
-			}
-			function oper(musicId, callback){
-				Music.findById(musicId, function(err, foundMusic){	
-
+			}else{
+				var orders = new Orders({
+					userId: req.user._id
+					
+				});
+				orders.save(async function(err, orders){
 					if(err){
 						console.log(err);
 					}else{
-						if(foundMusic.avaliable){
-							orders.item.push(foundMusic);
-							orders.save(function(err, order){
+						console.log(orders);
+
+						var x = 0;
+						var arr = req.user.cart;
+						var loopArray = function(arr){
+							oper(arr[x], function(){
+								x++;
+								if(x < arr.length){
+									loopArray(arr);
+								}
+							})							
+						}
+						function oper(musicId, callback){
+							Music.findById(musicId, function(err, foundMusic){	
+
 								if(err){
 									console.log(err);
 								}else{
-									console.log(orders);
-									foundMusic.inventory--;
-									if(foundMusic.inventory == 0){
-										foundMusic.avaliable = false;
-									}
-									foundMusic.save(function(err, data){
-										if(err){
-											console.log(err);
-										}else{
-											console.log(data);
-											callback();
-										}
-									})
+									if(foundMusic.avaliable){
+										orders.item.push(foundMusic);
+										orders.save(function(err, order){
+											if(err){
+												console.log(err);
+											}else{
+												console.log(orders);
+												foundMusic.inventory--;
+												if(foundMusic.inventory == 0){
+													foundMusic.avaliable = false;
+												}
+												foundMusic.save(function(err, data){
+													if(err){
+														console.log(err);
+													}else{
+														console.log(data);
+														callback();
+													}
+												})
+											}
+										})				
+									}else{
+										callback();
+									}			
 								}
-							})				
-						}else{
-							callback();
-						}			
-					}
-				})	
-			}
-			
-			loopArray(arr);
-			User.findById(req.user._id, function(err, foundUser){
-				foundUser.cart = [];
-				foundUser.save(function(err, data){
-					if(err){
-						console.log(err);
-					}else{
-						res.redirect("/cart");
+							})	
+						}
+						
+						loopArray(arr);
+						User.findById(req.user._id, function(err, foundUser){
+							foundUser.cart = [];
+							foundUser.save(function(err, data){
+								if(err){
+									console.log(err);
+								}else{
+									req.flash("success", "Your order has been placed");
+									res.redirect("/cart");
+								}
+							})
+						})
 					}
 				})
-			})
+			}
 		}
-	})
-
-	
+	})	
 })
 
 app.get("/history", isLoggedIn, function(req, res){
@@ -434,6 +443,7 @@ function isLoggedIn(req, res, next){
 	if(req.isAuthenticated()){
 		return next();
 	}
+	req.flash("error", "Please login first");
 	res.redirect("/login");
 }
 
@@ -441,6 +451,7 @@ function isAdmin(req, res, next){
 	if(req.isAuthenticated() && req.user.admin){
 		return next();
 	}
+	req.flash("error", "Please login with administrator account");
 	res.redirect("/login");
 }
 
