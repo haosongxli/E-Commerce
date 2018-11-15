@@ -1,117 +1,130 @@
 $(document).ready(function() {
-	alert("cont");
+	$("#userSignUp").attr("disabled", "disabled");
 
-	// form validation
-	$("tr").append("<span></span>")
-	$("#username").focusin(function(){
-		$("tr:nth-of-type(1) span").show();
-		$("tr:nth-of-type(1) span").removeClass('ok error');
-		$("tr:nth-of-type(1) span").addClass('info');
-		$("tr:nth-of-type(1) span").text("Contain only alphabetical or numeric characters");
-	})
+	var mark1 = false;
+	var mark2 = false;
+	var mark3 = false;
+	var mark4 = false;
+	
 	$("#username").focusout(function(){
 		var uname = $('#username').val();
-		var letterNumber = /^[0-9a-zA-Z]+$/;
-		if(uname.length == 0)
-		{
-			$("tr:nth-of-type(1) span").hide();
-		}
-		else if(letterNumber.test(uname)) 
-		{
-			$("tr:nth-of-type(1) span").removeClass('info error');
-			$("tr:nth-of-type(1) span").addClass('ok');
-			$("tr:nth-of-type(1) span").text("OK");
-		}
-		else
-		{
-			$("tr:nth-of-type(1) span").removeClass('ok info');
-			$("tr:nth-of-type(1) span").addClass('error');
-			$("tr:nth-of-type(1) span").text("Error");
-		}
-	})
 
-
-	$("#password").focusin(function(){
-		$("tr:nth-of-type(3) span").show();
-		$("tr:nth-of-type(3) span").removeClass('ok error');
-		$("tr:nth-of-type(4) span").removeClass('ok error');
-		$("tr:nth-of-type(4) span").hide();
-		$("tr:nth-of-type(3) span").addClass('info');
-		$("tr:nth-of-type(3) span").text("At least six characters long");
-	})
-	$("#password").focusout(function(){
-		var pword = $('#password').val();
-		if(pword.length == 0)
-		{
-			$("tr:nth-of-type(3) span").hide();
-		}
-		else if(pword.length>5) 
-		{
-			$("tr:nth-of-type(3) span").removeClass('info error');
-			$("tr:nth-of-type(3) span").addClass('ok');
-			$("tr:nth-of-type(3) span").text("OK");
-		}
-		else
-		{
-			$("tr:nth-of-type(3) span").removeClass('ok info');
-			$("tr:nth-of-type(3) span").addClass('error');
-			$("tr:nth-of-type(3) span").text("Error");
-		}
-	})
-
-	$("#cpassword").focusin(function(){
-		$("tr:nth-of-type(4) span").show();
-		$("tr:nth-of-type(4) span").removeClass('ok error');
-		$("tr:nth-of-type(4) span").addClass('info');
-		$("tr:nth-of-type(4) span").text("Should match the password");
-	})
-	$("#cpassword").focusout(function(){
-		var pword = $('#password').val();
-		var cpword = $('#cpassword').val();
-		if(cpword.length == 0)
-		{
-			$("tr:nth-of-type(4) span").hide();
-		}
-		else if(pword != cpword)
-		{
-			$("tr:nth-of-type(4) span").removeClass('ok info');
-			$("tr:nth-of-type(4) span").addClass('error');
-			$("tr:nth-of-type(4) span").text("Error");
-		}
-		else
-		{
-			$("tr:nth-of-type(4) span").removeClass('info error');
-			$("tr:nth-of-type(4) span").addClass('ok');
-			$("tr:nth-of-type(4) span").text("OK");
-		}
+		$.ajax({type:"POST", url:"/checkUser", data:{uname: uname}, success: function(result){
+			if(result == 1){
+				$("#notice1").text("Sorry, the username has been used");
+				$("#noticediv1").addClass('alert alert-warning');
+				mark1 = false;
+				$("#userSignUp").attr("disabled", "disabled");
+			}else{
+				$("#notice1").text("");
+				$("#noticediv1").removeClass('alert alert-warning');
+				mark1 = true;
+				if(mark1 && mark2 && mark3 && mark4){
+					$("#userSignUp").removeAttr("disabled");
+				}
+			}
+		}})		
 	})
 
 	$("#email").focusin(function(){
-		$("tr:nth-of-type(2) span").show();
-		$("tr:nth-of-type(2) span").removeClass('ok error');
-		$("tr:nth-of-type(2) span").addClass('info');
-		$("tr:nth-of-type(2) span").text("A valid email address");
+		$("#noticediv2").removeClass('alert alert-warning');
+		$("#notice2").text("");
+		mark2 =false;
 	})
+
 	$("#email").focusout(function(){
 		var wemail = $('#email').val();
 		var remail = /^\w+@\w+\.\w{3}$/;
-		if(wemail.length == 0)
+		if(remail.test(wemail)) 
 		{
-			$("tr:nth-of-type(2) span").hide();
+			$("#noticediv2").removeClass('alert alert-warning');
+			$("#notice2").text("");
+			mark2 = true;
 		}
-		else if(remail.test(wemail)) 
+		else if(wemail.length != 0)
 		{
-			$("tr:nth-of-type(2) span").removeClass('info error');
-			$("tr:nth-of-type(2) span").addClass('ok');
-			$("tr:nth-of-type(2) span").text("OK");
+			$("#noticediv2").addClass('alert alert-warning');
+			$("#notice2").text("Please enter a valid email address");
 		}
-		else
-		{
-			$("tr:nth-of-type(2) span").removeClass('ok info');
-			$("tr:nth-of-type(2) span").addClass('error');
-			$("tr:nth-of-type(2) span").text("Error");
+		if(mark1 && mark2 && mark3 && mark4){
+			$("#userSignUp").removeAttr("disabled");
+
+		}else{
+			$("#userSignUp").attr("disabled", "disabled");
 		}
 	})
 
-	
+	$("#password").focusin(function(){
+		$("#notice3").text("length of the password should be at least 5");
+		$("#noticediv3").addClass('alert alert-info');
+		mark3 = false;
+	})
+
+	$("#password").focusout(function(){
+		var pword = $('#password').val();
+		var cpword = $('#cpassword').val();
+		if(pword.length == 0)
+		{
+			$("#notice3").text("");
+			$("#noticediv3").removeClass('alert alert-info');
+		}
+		else if(pword.length>5) 
+		{
+			$("#notice3").text("");
+			$("#noticediv3").removeClass('alert alert-info');
+			mark3 = true;
+		}
+		else
+		{
+			$("#noticediv3").removeClass('alert-info');
+			$("#noticediv3").addClass('alert-warning');
+			$("#notice3").text("length of the password should be at least 6");
+		}
+		if(cpword != pword && cpword.length != 0){
+			mark4 = false;
+			$("#notice4").text("please reconfirm your password");
+			$('#noticediv4').addClass('alert alert-warning');
+		}
+		if(cpword == pword && pword.length > 5){
+			mark4 = true;
+			$("#notice4").text("");
+			$('#noticediv4').removeClass('alert alert-warning');
+		}
+		if(mark1 && mark2 && mark3 && mark4){
+			$("#userSignUp").removeAttr("disabled");
+		}else{
+			$("#userSignUp").attr("disabled", "disabled");
+		}
+		
+	})
+
+	$("#cpassword").focusin(function(){
+		$("#notice4").text("");
+		$("#noticediv4").removeClass('alert alert-warning');
+		mark4 = false;
+	})
+
+	$("#cpassword").keyup(function(){
+		var pword = $('#password').val();
+		var cpword = $('#cpassword').val();
+		if(pword.length != 0){
+			if(cpword != pword){
+				$("#notice4").text("please reconfirm your password");
+				$('#noticediv4').addClass('alert alert-warning');
+			}else{
+				$("#notice4").text("");
+				$("#noticediv4").removeClass('alert alert-warning');
+				mark4 = true;
+			}
+		}
+		else{
+			$("#notice4").text("");
+			$("#noticediv4").removeClass('alert alert-warning');
+		}
+		if(mark1 && mark2 && mark3 && mark4){
+			$("#userSignUp").removeAttr("disabled");
+		}else{
+			$("#userSignUp").attr("disabled", "disabled");
+		}
+	})	
 });

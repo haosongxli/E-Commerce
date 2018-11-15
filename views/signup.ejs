@@ -2,21 +2,32 @@
 <%include partials/header%>
 <div class="container">
 	<div class="row">
-
 	<h1 style="text-align: center;">Sign Up</h1>
 	<div style="width: 30%; margin: 30px auto;">
 	<form class="signup" id="signUpForm" action="/signup" method="POST">
 		<div class="form-group">
 			<input class="form-control" type="text" name="username" id="username" placeholder="Username">
 		</div>
+		<div style="text-align: center;" id="noticediv1">
+			<span id="notice1"></span>
+		</div>
 		<div class="form-group">
 			<input class="form-control" type="text" name="email" id="email" placeholder="Email">
+		</div>
+		<div style="text-align: center;" id="noticediv2">
+			<span id="notice2"></span>
 		</div>
 		<div class="form-group">
 			<input class="form-control" type="password" name="password" id="password" placeholder="Password">
 		</div>
+		<div style="text-align: center;" id="noticediv3">
+			<span id="notice3"></span>
+		</div>
 		<div class="form-group">
 			<input class="form-control" type="password" name="cpassword" id="cpassword" placeholder="Comfirm Password">
+		</div>
+		<div style="text-align: center;" id="noticediv4">
+			<span id="notice4"></span>
 		</div>
 		<div class="form-group">
 			<button id="userSignUp" class="btn btn-lg btn-primary btn-block">Sign Up</button>
@@ -26,4 +37,6 @@
 	</div>
 	</div>
 </div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/validate.js"></script>
 <%include partials/footer%>

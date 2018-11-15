@@ -186,8 +186,21 @@ app.get("/login", function(req, res){
 app.post("/login", passport.authenticate("local", 
 	{
 		successRedirect: "/musicstore",
-		failureRedirect: "/login"
+		failureRedirect: "/login",
+		failureFlash: true
 	}), function(req, res){
+})
+
+app.post("/checkUser", function(req, res){
+	console.log("1");
+	console.log(req.body.uname);
+	User.find({username: req.body.uname}).countDocuments().exec(function(err, count){
+		if(err){
+			console.log(err);
+		}else{
+			res.json(count);
+		}
+	})
 })
 
 app.get("/logout", isLoggedIn, function(req, res){
